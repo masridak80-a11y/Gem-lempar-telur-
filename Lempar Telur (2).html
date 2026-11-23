@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f59e0b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Lempar Telur">
+<title>Lempar Telur</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fdf6e3;--card:#fff;--tx:#2b2b2b;--mu:#777;--bd:#e3dcc8;--ac:#f59e0b}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a17;--card:#27251f;--tx:#f2eee3;--mu:#a09a88;--bd:#3a372d}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,sans-serif;padding:12px;max-width:560px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:10px}
+h2{font-size:15px;margin:0 0 8px}
+.top{display:flex;justify-content:space-between;font-weight:700}
+.mu{color:var(--mu);font-size:12px}
+button{font:inherit;border:0;border-radius:10px;padding:10px 12px;background:var(--ac);color:#fff;font-weight:700;cursor:pointer}
+button:disabled{opacity:.4}
+#throw{width:100%;font-size:18px;padding:14px}
+.track{position:relative;height:84px;border-radius:10px;overflow:hidden;display:flex;margin:8px 0}
+.z{flex:1;font-size:10px;color:#fff;display:flex;align-items:flex-start;padding-top:8px;justify-content:center;text-align:center}
+#egg{position:absolute;left:0;top:42px;z-index:2;font-size:22px;transition:left .9s cubic-bezier(.2,.7,.3,1)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bd)}
+.row:first-of-type{border-top:0}
+.msg{min-height:40px;text-align:center;font-size:15px}
+#admin{display:none;border-color:#dc2626}
+#admin input,#admin select{font:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);width:100%;min-width:0}
+#admin .row>div{flex:1;display:flex;gap:6px;flex-wrap:wrap}
+#admin button{padding:8px 10px;font-size:13px}
+@keyframes arc{0%{translate:0 0}50%{translate:0 -44px}100%{translate:0 0}}
+@keyframes spin{to{rotate:720deg}}
+@keyframes hue{to{filter:hue-rotate(360deg)}}
+@keyframes fade{to{opacity:0;translate:0 10px}}
+body{transition:background .6s,color .6s}
+#load{position:fixed;inset:0;z-index:999;background:radial-gradient(circle at 50% 35%,#3b1d6e,#140a2b 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;padding:20px;transition:opacity .6s,visibility .6s;overflow:hidden}
+#load.hide{opacity:0;visibility:hidden}
+#load>*:not(.lp){position:relative;z-index:1}
+#lEgg{font-size:84px;animation:lbounce 1s ease-in-out infinite;filter:drop-shadow(0 10px 18px rgba(255,200,50,.5))}
+#load h1{margin:0;font-size:32px;letter-spacing:1px;background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#lBar{width:min(260px,70vw);height:10px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden}
+#lFill{height:100%;width:0;background:linear-gradient(90deg,#f59e0b,#fde68a);border-radius:99px;transition:width .2s}
+#lTip{font-size:13px;opacity:.85;min-height:18px;text-align:center}
+.lp{position:absolute;top:0;pointer-events:none;opacity:.5;animation:lfloat linear infinite}
+@keyframes lbounce{0%,100%{translate:0 0;rotate:-8deg}50%{translate:0 -22px;rotate:8deg}}
+@keyframes lfloat{from{translate:0 105vh}to{translate:0 -20vh}}
+@keyframes lpop{0%{scale:.6}60%{scale:1.35}100%{scale:1}}
+.own{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;translate:-50% 0;z-index:900;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:16px;background:linear-gradient(135deg,#fde68a,#f59e0b);color:#3b2400;box-shadow:0 0 0 3px #fff8,0 10px 30px rgba(245,158,11,.7);animation:oin .6s cubic-bezier(.2,1.4,.4,1),oglow 1s ease-in-out .6s 3;max-width:92vw}
+.own.out{opacity:0;translate:-50% -30px;transition:opacity .6s,translate .6s}
+.own .oc{font-size:32px;animation:ospin 1s ease-in-out infinite alternate}
+.own b{font-size:16px}.own .mu2{font-size:12px;opacity:.8}
+@keyframes oin{from{translate:-50% -120px;scale:.6}to{translate:-50% 0;scale:1}}
+@keyframes oglow{50%{box-shadow:0 0 0 6px #fff8,0 10px 44px rgba(245,158,11,1)}}
+@keyframes ospin{from{rotate:-15deg;scale:1}to{rotate:15deg;scale:1.2}}
+.oflash{position:fixed;inset:0;z-index:800;pointer-events:none;background:radial-gradient(circle at 50% 0%,rgba(253,224,71,.55),transparent 65%);animation:ofl 1.4s ease-out forwards}
+@keyframes ofl{from{opacity:1}to{opacity:0}}
+#gate{position:fixed;inset:0;z-index:990;background:radial-gradient(circle at 50% 30%,#3b1d6e,#140a2b 70%);display:flex;align-items:center;justify-content:center;padding:20px;color:#fff;transition:opacity .5s,visibility .5s}
+#gate.hide{opacity:0;visibility:hidden;pointer-events:none}
+.gbox{max-width:340px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.gbox h2{margin:0;font-size:22px;color:#fde68a}
+.gm{font-size:13px;opacity:.85;line-height:1.5}
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:linear-gradient(180deg,rgba(125,211,252,.28),rgba(255,255,255,0) 45%,rgba(134,239,172,.25) 100%)}
+#bg::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-30px;height:150px;border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 30% 100%,rgba(34,197,94,.45),transparent 70%),radial-gradient(ellipse at 75% 100%,rgba(22,163,74,.4),transparent 65%)}
+.cl{position:absolute;left:0;font-size:46px;opacity:.5;animation:wR linear infinite}
+#walk{position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);height:70px;z-index:40;pointer-events:none;overflow:hidden}
+.an{position:absolute;left:0;animation-timing-function:linear;animation-iteration-count:infinite}
+.an span{display:block;animation:hop .45s ease-in-out infinite alternate}
+@keyframes wR{from{translate:-20vw 0}to{translate:120vw 0}}
+@keyframes wL{from{translate:120vw 0}to{translate:-20vw 0}}
+@keyframes hop{to{translate:0 -7px;rotate:5deg}}
+@media(prefers-reduced-motion:reduce){#walk,.cl{display:none}}
+#throw{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(180deg,#fbbf24,#d97706);box-shadow:0 5px 0 #92400e,0 8px 14px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.5);text-shadow:0 1px 2px rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s}
+#throw:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #92400e,0 3px 6px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.5)}
+#throw svg{filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+#throw small{font-weight:600;opacity:.9}
+.track{box-shadow:inset 0 -14px 18px rgba(0,0,0,.3),inset 0 6px 10px rgba(255,255,255,.25),0 3px 8px rgba(0,0,0,.25)}
+.z{background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(0,0,0,.28))!important}
+.track::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:linear-gradient(#6b4f2a,#3e2c14);box-shadow:0 -2px 0 #7fb642;z-index:1}
+#egg svg{display:block;filter:drop-shadow(0 4px 3px rgba(0,0,0,.4))}
+.an span{filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
+.an::after{content:"";position:absolute;left:10%;right:10%;bottom:-3px;height:6px;border-radius:50%;background:rgba(0,0,0,.28);filter:blur(2px);z-index:-1}
+.card{background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(3px)}
+body{padding-bottom:150px;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+input{user-select:text;-webkit-user-select:text}
+button{touch-action:manipulation}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+.tabhide{display:none!important}
+@keyframes tabin{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+.tabin{animation:tabin .25s ease-out}
+#appnav{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--bd);box-shadow:0 -4px 14px rgba(0,0,0,.12)}
+#appnav button{flex:1;max-width:110px;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;color:var(--mu);box-shadow:none;padding:4px 2px;font-size:11px;font-weight:600;border-radius:12px}
+#appnav .ni{font-size:22px;transition:transform .15s}
+#appnav button.on{color:var(--ac)}
+#appnav button.on .ni{transform:translateY(-2px) scale(1.15)}
+#walk{bottom:calc(env(safe-area-inset-bottom,0px) + 62px)}
+#gate input{font:inherit;font-size:17px;padding:12px;border-radius:12px;border:2px solid #f59e0b;background:#1f1340;color:#fff;text-align:center;width:100%}
+.card{transition:background .6s,border-color .6s}
+@keyframes fall{from{translate:0 -10vh;rotate:0deg}to{translate:var(--dx,0) 110vh;rotate:360deg}}
+.fx{position:fixed;top:0;pointer-events:none;z-index:50;opacity:.85;animation:fall 4s linear forwards}
+body.th-money{--bg:#052e16;--card:#0a3d1f;--tx:#ecfdf5;--mu:#86efac;--bd:#16a34a;--ac:#22c55e}
+body.th-wind{--bg:#0c1f33;--card:#12304d;--tx:#e0f2fe;--mu:#7dd3fc;--bd:#38bdf8;--ac:#0ea5e9}
+body.th-rare{--bg:#2b2005;--card:#3a2c08;--tx:#fef9c3;--mu:#fcd34d;--bd:#f59e0b;--ac:#f59e0b}
+body.th-speed{--bg:#111;--card:#1c1c1c;--tx:#fef08a;--mu:#facc15;--bd:#eab308;--ac:#eab308}
+body.th-gate{--bg:#1e0b3a;--card:#2d1255;--tx:#f3e8ff;--mu:#c084fc;--bd:#a855f7;--ac:#9333ea}
+#egg.a1{animation:arc .95s ease-out}
+#egg.a2{animation:arc .95s ease-out,spin .95s linear}
+#egg.a3{font-size:26px}
+#egg.a4{font-size:28px;animation:arc .95s ease-out}
+#egg.a5{font-size:28px;animation:arc .95s ease-out,spin .95s linear,hue .95s linear}
+.p{position:absolute;font-size:14px;pointer-events:none;z-index:1;animation:fade .6s forwards}
+</style></head><body>
+<div id="load"><div id="lEgg">🥚</div><h1>Lempar Telur</h1><div id="lBar"><div id="lFill"></div></div><div id="lPct" style="font-size:13px;opacity:.8">0%</div><div id="lTip"></div></div>
+<script>
+(function(){var L=document.getElementById("load"),F=document.getElementById("lFill"),T=document.getElementById("lTip"),E=document.getElementById("lEgg"),P=document.getElementById("lPct");
+var tips=["Lempar lebih jauh untuk masuk zona yang lebih tinggi!","Latihan membuat lemparanmu makin kuat","Ada zona rahasia yang menunggu...","Hewan langka menghasilkan uang jauh lebih banyak","Lengkapi Index Hewan untuk jadi kolektor sejati"];
+var em=["🥚","🐔","🐰","🦊","🦁","🦄","🐉","🐧","🐼","🥚"];
+for(var i=0;i<12;i++){var s=document.createElement("span");s.className="lp";s.textContent=em[i%em.length];s.style.left=Math.random()*92+"%";s.style.fontSize=(16+Math.random()*22)+"px";s.style.animationDuration=(6+Math.random()*6)+"s";s.style.animationDelay=(-Math.random()*8)+"s";L.appendChild(s)}
+var p=0,ti=0,done=false;T.textContent=tips[0];
+function hide(){if(done)return;done=true;L.classList.add("hide");setTimeout(function(){L.remove()},700)}
+L.onclick=hide;setTimeout(hide,6000);
+var tt=setInterval(function(){ti=(ti+1)%tips.length;T.textContent=tips[ti]},1100);
+var iv=setInterval(function(){p+=Math.random()*9+4;if(p>=100){p=100;clearInterval(iv);clearInterval(tt);E.textContent="🐣";E.style.animation="lpop .6s";T.textContent="Siap! Selamat bermain 🎉";setTimeout(hide,700)}F.style.width=p+"%";P.textContent=Math.floor(p)+"%"},180);
+})();
+</script>
+<div id="bg"><span class="cl" style="top:5%;animation-duration:70s">☁️</span><span class="cl" style="top:14%;font-size:34px;animation-duration:95s;animation-delay:-40s">☁️</span><span class="cl" style="top:30%;font-size:40px;animation-duration:120s;animation-delay:-80s">☁️</span></div><div id="walk"></div>
+<div id="gate"><div class="gbox"><div style="font-size:54px">🥚</div><h2 id="gT">Memeriksa akun...</h2><div id="gM" class="gm">Mohon tunggu sebentar.</div><div id="gF" style="display:none;flex-direction:column;gap:10px"><input id="gIn" maxlength="14" placeholder="Nama pemain (3–14 karakter)" autocomplete="off"><button id="gGo" style="padding:13px;font-size:16px">Mulai Main</button></div></div></div>
+<div class="card" style="display:flex;align-items:center;gap:8px"><span id="nickIc" style="font-size:22px">👤</span><input id="lbNick" maxlength="14" placeholder="Ketik nama pemain" style="flex:1;min-width:0;font:inherit;font-size:17px;font-weight:700;padding:6px 8px;border:1px dashed var(--bd);border-radius:8px;background:transparent;color:var(--tx)"></div>
+<div class="card top"><span>💰 <span id="money">0</span></span><span>📈 <span id="inc">0</span>/dtk</span></div>
+
+<div class="card">
+<div class="msg" id="msg">Lempar telur untuk mendapat hewan!</div>
+<div class="track" id="track"></div>
+<button id="throw">🥚 Lempar Telur</button>
+<div class="mu" style="margin-top:6px">Kekuatan lemparan: <b id="pw"></b> m</div>
+</div>
+
+<div class="card"><h2>🏋️ Latihan</h2><div id="train"></div></div>
+<div class="card"><h2>🐾 Hewan Kamu</h2><div id="zoo" class="mu">Belum ada hewan.</div></div>
+<div class="card" id="admin"><h2>🔧 Admin Panel</h2>
+<div class="row"><div><input id="aMoney" type="number" placeholder="Jumlah uang"><button onclick="adm('mAdd')">Tambah</button><button onclick="adm('mSet')">Set</button></div></div>
+<div class="row"><div><input id="aPw" type="number" placeholder="Level Kekuatan"><button onclick="adm('pw')">Set</button></div></div>
+<div class="row"><div><input id="aCd" type="number" placeholder="Level Kecepatan"><button onclick="adm('cd')">Set</button></div></div>
+<div class="row"><div><input id="aLk" type="number" placeholder="Level Keberuntungan"><button onclick="adm('lk')">Set</button></div></div>
+<div class="row"><div><select id="aSel"></select><input id="aN" type="number" value="1" style="width:70px"><button onclick="adm('spawn')">Beri hewan</button></div></div>
+<div class="row"><div><input id="aDist" type="number" placeholder="Paksa jarak lemparan (m), 0 = normal"><button onclick="adm('dist')">Set</button></div></div>
+<div class="row"><div><input id="aMult" type="number" placeholder="Pengali pendapatan (1 = normal)"><button onclick="adm('mult')">Set</button></div></div>
+<div class="row"><div><button onclick="ownerFx('Tes')">Tes notif owner</button><button id="aCdBtn" onclick="adm('nocd')">Tanpa jeda: MATI</button><button style="background:#dc2626" onclick="adm('clear')">Hapus semua hewan</button></div></div>
+<div class="row"><div><select id="aEv"></select><input id="aEvT" type="number" value="1" style="width:70px"><span class="mu">menit</span><button onclick="adm('ev')">Mulai event</button><button style="background:#dc2626" onclick="adm('evStop')">Stop event</button></div></div>
+<div class="row" id="aRen" style="display:none"><div><select id="aRenSel"></select><input id="aRenIn" maxlength="14" placeholder="Nama baru pemain"><button onclick="renamePlayer()">Ganti nama</button></div></div>
+<div class="mu" id="aInfo"></div></div>
+<div class="card"><button id="adminBtn" style="background:#dc2626;font-size:12px">🔧 Admin</button> <button id="reset" style="background:#999;font-size:12px">Reset game</button></div>
+<div class="card" id="pinBox" style="display:none"><div style="display:flex;gap:6px"><input id="pinIn" type="password" inputmode="numeric" placeholder="Masukkan PIN admin" style="flex:1;min-width:0;font:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)"><button id="pinOk">Buka</button></div><div class="mu" id="pinErr"></div></div>
+
+<script>
+const ZONES=[
+{n:"Common",min:0,c:"#8d8d8d",a:[["🐔",1],["🐥",1],["🐹",2]]},
+{n:"Rare",min:60,c:"#2e86de",a:[["🐰",5],["🦊",8],["🐧",10]]},
+{n:"Epic",min:200,c:"#8e44ad",a:[["🦁",25],["🐯",30],["🐘",40]]},
+{n:"Legendary",min:500,c:"#e67e22",a:[["🦄",120],["🐉",200]]},
+{n:"Mythic",min:1200,c:"#e84393",a:[["🔥🐦",600,50],["🌌🐋",900,40],["👑🐲",3000,8],["🪐🦕",8000,1.5],["💎🦄",25000,.5]]},
+{n:"Rahasia",min:4000,c:"#0d9488",s:1,a:[["🌑🐺",60000,45],["🔮🦉",120000,30],["⏳🐍",300000,18],["🌠🐙",900000,6],["👽🛸",5000000,1]]}];
+const UP=[
+{k:"pw",t:"💪 Kekuatan Lempar",d:"+30% jarak",base:50,f:1.5},
+{k:"cd",t:"⚡ Kecepatan Lempar",d:"jeda lebih singkat",base:80,f:1.7,max:10},
+{k:"lk",t:"🍀 Keberuntungan",d:"lemparan lebih stabil & jauh",base:120,f:1.8,max:10}];
+[0,150,600,2000,7000,25000].forEach((m,i)=>ZONES[i].min=m);
+[[60,30,10],[55,35,10],[60,30,10],[85,15]].forEach((w,i)=>ZONES[i].a.forEach((a,j)=>a[2]=w[j]));
+ZONES.forEach(z=>z.a.forEach(a=>{a[1]=Math.round(a[1]*5)/10}));
+Object.assign(UP[0],{base:150,f:1.55,d:"+20% jarak"});Object.assign(UP[1],{base:300,f:2,max:8});Object.assign(UP[2],{base:400,f:2.2,max:8});
+const EGG='<svg viewBox="0 0 40 52" width="24" height="31"><defs><radialGradient id="egr" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#fffdf5"/><stop offset=".55" stop-color="#f1dfbb"/><stop offset="1" stop-color="#b98f55"/></radialGradient></defs><path d="M20 2C9 2 2 20 2 32c0 11 8 18 18 18s18-7 18-18C38 20 31 2 20 2z" fill="url(#egr)"/><ellipse cx="14" cy="16" rx="4" ry="7" fill="#fff" opacity=".6" transform="rotate(-20 14 16)"/></svg>';
+const eg=x=>x==="🥚"?EGG:x;
+const ANIMS=[
+{n:"Klasik",e:"🥚",p:0,t:.9,c:"",d:"Lemparan lurus biasa",tr:null},
+{n:"Lompat",e:"🥚",p:200,t:.95,c:"a1",d:"Melambung membentuk busur",tr:null},
+{n:"Putar",e:"🌀",p:800,t:.95,c:"a2",d:"Berputar sambil melayang",tr:"💫"},
+{n:"Roket",e:"🚀",p:3000,t:.6,c:"a3",d:"Melesat cepat dengan asap",tr:"💨"},
+{n:"Meteor",e:"☄️",p:10000,t:.95,c:"a4",d:"Busur tinggi dengan api",tr:"🔥"},
+{n:"Pelangi",e:"🌈",p:40000,t:.95,c:"a5",d:"Berputar, berubah warna, berkilau",tr:"✨"}];
+let S={money:20,pw:0,cd:0,lk:0,zoo:{},own:[0],eq:0};
+try{let x=localStorage.getItem("telur1");if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
+{const AM={};ZONES.forEach(z=>z.a.forEach(a=>AM[a[0]]=a[1]));for(const k in S.zoo)if(AM[k]!=null)S.zoo[k].i=AM[k]}
+const $=id=>document.getElementById(id);
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+"jt":n>=1e3?(n/1e3).toFixed(1)+"rb":n>=10?Math.floor(n):Math.round(n*10)/10;
+const power=()=>15*Math.pow(1.2,S.pw);const eggCost=()=>Math.floor(3+Math.pow(S.pw,1.7));
+const cdMs=()=>Math.max(800,2500*Math.pow(.92,S.cd))*(VIP.on?.8:1);
+const cost=u=>Math.floor(u.base*Math.pow(u.f,S[u.k]));
+let VIP={on:false,until:0};
+let A={dist:0,nocd:false,mult:1};
+const income=()=>{let t=0;for(const k in S.zoo){t+=S.zoo[k].n*S.zoo[k].i}return t*A.mult*evM("inc")*(VIP.on?1.25:1)};
+function save(){try{localStorage.setItem("telur1",JSON.stringify(S))}catch(e){}}
+const track=$("track");
+const zl=z=>z.s&&!S.sec?"???<br>???":z.n+"<br>"+z.min+"m+";
+track.innerHTML=ZONES.map((z,i)=>`<div class="z" id="z${i}" style="background:${z.c}">${zl(z)}</div>`).join("")+'<div id="egg">🥚</div>';
+let ready=true;
+$("throw").onclick=()=>{
+ if(!ready)return;const ec=eggCost();if(S.money<ec&&income()>0){$("msg").textContent="Uang tidak cukup untuk membeli telur (💰 "+fmt(ec)+")";return}if(S.money>=ec)S.money-=ec;ready=false;$("throw").disabled=true;SFX.throw();
+ const lo=.3+S.lk*.04,hi=1.1+S.lk*.04;
+ const d0=A.dist>0?A.dist:power()*(lo+Math.random()*(hi-lo));const d=Math.max(d0*evM("dist"),evF());S.best=Math.max(S.best||0,d);S.th=(S.th||0)+1;
+ let zi=0;ZONES.forEach((z,i)=>{if(d>=z.min)zi=i});
+ const z=ZONES[zi];
+ const pos=(zi+Math.min(1,(d-z.min)/((ZONES[zi+1]?ZONES[zi+1].min:z.min*2)-z.min)))/ZONES.length;
+ const e=$("egg"),an=ANIMS[S.eq||0];e.style.transition="none";e.className="";e.innerHTML=eg(an.e);e.style.left="0";void e.offsetWidth;e.style.transition=`left ${an.t}s cubic-bezier(.2,.7,.3,1)`;e.className=an.c;if(an.tr){const iv=setInterval(()=>{const r=e.getBoundingClientRect(),t=track.getBoundingClientRect(),p=document.createElement("span");p.className="p";p.textContent=an.tr;p.style.left=(r.left-t.left)+"px";p.style.top=(r.top-t.top+4)+"px";p.onanimationend=()=>p.remove();track.appendChild(p)},70);setTimeout(()=>clearInterval(iv),an.t*1000)}
+ e.style.left=`calc(${(pos*100).toFixed(1)}% - 14px)`;
+ setTimeout(()=>{
+  if(!evOn("rare")&&Math.random()<Math.max(.03,.15-S.lk*.015)*(VIP.on?.5:1)){$("msg").innerHTML="💥 Telur pecah di "+Math.floor(d)+" m... tidak ada hewan.";SFX.break();e.className="";save();render();setTimeout(()=>{ready=true;$("throw").disabled=false},(A.nocd||evOn("nocd"))?0:cdMs());return}
+  const wf=x=>(x[2]||1)*(x[2]&&x[2]<=8?evM("rare"):1);const tw=z.a.reduce((s,x)=>s+wf(x),0);let rr=Math.random()*tw,a=z.a[0];for(const x of z.a){rr-=wf(x);if(rr<0){a=x;break}}
+  const key=a[0];
+  if(!S.zoo[key])S.zoo[key]={n:0,i:a[1],z:zi};
+  S.zoo[key].n++;if(z.s)S.sec=1;SFX.hatch(zi);if(a[2]&&a[2]<=8)setTimeout(SFX.rare,350);if(z.s)setTimeout(SFX.secret,250);
+  $("msg").innerHTML=`Mendarat di <b style="color:${z.c}">${z.n}</b> (${Math.floor(d)} m)!<br>Menetas: ${key} (+${a[1]}/dtk)${a[2]&&a[2]<=8?" 🌟 LANGKA!":""}${z.s?" 🔮 ZONA RAHASIA!":""}`;
+  e.className="";save();render();
+  setTimeout(()=>{ready=true;$("throw").disabled=false},A.nocd||evOn("nocd")?0:cdMs());
+ },an.t*1000+60);
+};
+function sell(k){const h=S.zoo[k];if(!h)return;S.money+=h.i*12;SFX.coin();h.n--;if(h.n<=0)delete S.zoo[k];save();render()}
+function buy(i){const u=UP[i],c=cost(u);if(S.money<c||(u.max&&S[u.k]>=u.max))return;S.money-=c;S[u.k]++;SFX.buy();save();render()}
+function render(){
+ $("money").textContent=fmt(S.money);$("inc").textContent=fmt(income());
+ $("pw").textContent=Math.floor(power());$("throw").innerHTML=EGG.replace('width="24" height="31"','width="22" height="28"')+"<span>Lempar Telur <small>(💰 "+fmt(eggCost())+")</small></span>";
+ if(!S.own)S.own=[0];if(S.eq==null)S.eq=0;
+ if($("shop"))$("shop").innerHTML=ANIMS.map((a,i)=>{const o=S.own.includes(i),q=S.eq===i;
+  return `<div class="row"><div><span style="font-size:20px">${a.e}</span> <b>${a.n}</b><br><span class="mu">${a.d}</span></div>`+(q?`<button disabled>Dipakai</button>`:o?`<button style="background:#16a34a" onclick="equipA(${i})">Pakai</button>`:`<button ${S.money<a.p?"disabled":""} onclick="buyA(${i})">💰 ${fmt(a.p)}</button>`)+`</div>`}).join("");
+ if(!$("egg").className)$("egg").innerHTML=eg(ANIMS[S.eq].e);
+ if(!S.dex)S.dex={};for(const k in S.zoo)S.dex[k]=1;
+ for(const k in S.zoo){const zz=ZONES[S.zoo[k].z];if(zz&&zz.s)S.sec=1}
+ ZONES.forEach((z,i)=>{if(z.s){const el=$("z"+i);el.innerHTML=zl(z);el.style.background=S.sec?z.c:"#374151"}});
+ if($("dex")){let tot=0,got=0;const h=ZONES.map(z=>{if(z.s&&!S.sec)return '<div style="margin-top:8px" class="mu">❓ Ada zona rahasia yang belum ditemukan...</div>';const tw=z.a.reduce((s,x)=>s+(x[2]||1),0);
+  return `<div style="margin-top:8px"><b style="color:${z.c}">${z.n}</b> <span class="mu">(${z.min}m+)</span><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">`+z.a.map(a=>{tot++;const f=S.dex[a[0]];if(f)got++;
+   return `<div style="border:1px solid ${f?z.c:"var(--bd)"};border-radius:10px;padding:6px 8px;min-width:88px;text-align:center;opacity:${f?1:.55}"><div style="font-size:22px">${f?a[0]:"❓"}</div><div class="mu">${f?a[1]+"/dtk<br>"+((a[2]||1)/tw*100).toFixed(1).replace(/\.0$/,"")+"%":"???"}</div></div>`}).join("")+`</div></div>`}).join("");
+  $("dex").innerHTML=`<div class="mu">Terkumpul: <b>${got}/${tot}</b></div>`+h}
+ $("train").innerHTML=UP.map((u,i)=>{const c=cost(u),mx=u.max&&S[u.k]>=u.max;
+  return `<div class="row"><div>${u.t} <span class="mu">Lv ${S[u.k]}<br>${u.d}</span></div><button ${S.money<c||mx?"disabled":""} onclick="buy(${i})">${mx?"MAX":"💰 "+fmt(c)}</button></div>`}).join("");
+ const ks=Object.keys(S.zoo).sort((a,b)=>S.zoo[b].z-S.zoo[a].z||S.zoo[b].i-S.zoo[a].i);
+ $("zoo").innerHTML=ks.length?ks.map(k=>{const h=S.zoo[k],z=ZONES[h.z];
+  return `<div class="row"><div style="font-size:20px">${k} <b>×${h.n}</b> <span class="mu" style="color:${z.c}">${z.n} · ${h.i}/dtk</span></div><button onclick="sell('${k}')" style="background:#16a34a">Jual 💰${fmt(h.i*12)}</button></div>`}).join(""):"Belum ada hewan.";
+}
+setInterval(()=>{S.tot=(S.tot||0)+income()/4;S.money+=income()/4;$("money").textContent=fmt(S.money);$("inc").textContent=fmt(income());updEv()},250);
+setInterval(()=>{save();render()},2000);
+const PIN="1234"; // ganti PIN di sini
+const sh=document.createElement("div");sh.className="card";sh.innerHTML='<h2>🎨 Animasi Lemparan</h2><div id="shop"></div>';$("zoo").parentElement.before(sh);
+function buyA(i){const a=ANIMS[i];if(S.money<a.p||S.own.includes(i))return;S.money-=a.p;S.own.push(i);S.eq=i;SFX.buy();save();render()}
+function equipA(i){if(S.own.includes(i)){S.eq=i;save();render()}}
+const ix=document.createElement("div");ix.className="card";ix.innerHTML='<h2>📖 Index Hewan</h2><div id="dex"></div>';$("zoo").parentElement.after(ix);
+const EVENTS=[
+{id:"money",n:"💸 Hujan Uang",d:"Pendapatan ×3",inc:3},
+{id:"wind",n:"🌪️ Badai Angin",d:"Jarak lemparan ×2",dist:2},
+{id:"rare",n:"🌟 Festival Langka",d:"Peluang hewan langka ×5",rare:5},
+{id:"speed",n:"⚡ Jam Gila",d:"Tanpa jeda lempar",nocd:1},
+{id:"gate",n:"🔮 Gerbang Rahasia",d:"Lemparan selalu sampai 25000 m",force:25000}];
+$("aEv").innerHTML=EVENTS.map(e=>`<option value="${e.id}">${e.n} – ${e.d}</option>`).join("");
+const lb=document.createElement("div");lb.className="card";lb.innerHTML='<h2>🏆 Leaderboard</h2><div id="lbTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div><div id="lbList" class="mu">Memuat...</div>';ix.after(lb);
+const LBM=[{k:"inc",t:"📈 Pendapatan",f:v=>fmt(v)+"/dtk"},{k:"best",t:"🎯 Jarak",f:v=>Math.floor(v)+" m"},{k:"dex",t:"📖 Koleksi",f:v=>v+" hewan"},{k:"tot",t:"💰 Total uang",f:v=>fmt(v)}];
+let NAMES={},VIPS={};let lbK="inc",lbRows=[],lbMe=null,lbDb=null,lbLast="";
+function lbStats(){return{nick:($("lbNick").value||"Pemain").slice(0,14),inc:Math.floor(income()),best:Math.floor(S.best||0),dex:Object.keys(S.dex||{}).length,tot:Math.floor(S.tot||0),adm:S.adm?1:0}}
+function lbDraw(){const T=$("lbTabs");T.innerHTML="";LBM.forEach(m=>{const b=document.createElement("button");b.textContent=m.t;b.style.cssText="padding:6px 8px;font-size:12px;"+(m.k===lbK?"":"background:#999");b.onclick=()=>{lbK=m.k;lbDraw()};T.appendChild(b)});
+ const L=$("lbList");if(!lbDb){L.className="mu";return}L.className="";L.innerHTML="";const M=LBM.find(m=>m.k===lbK);
+ const r=lbRows.slice().sort((a,b)=>(b[lbK]||0)-(a[lbK]||0)).slice(0,20);
+ if(!r.length){L.className="mu";L.textContent="Belum ada pemain.";return}
+ r.forEach((p,i)=>{const d=document.createElement("div");d.className="row";const a=document.createElement("span");a.textContent=(i<3?["🥇","🥈","🥉"][i]:(i+1)+".")+" "+(VIPS[p.id]>Date.now()?"⭐ ":"")+(NAMES[p.id]||p.nick||"Pemain")+(p.adm?" 🔧":"")+(p.id===lbMe?" (kamu)":"");const v=document.createElement("b");v.textContent=M.f(p[lbK]||0);d.append(a,v);L.appendChild(d)})}
+try{$("lbNick").value=localStorage.getItem("telurNick")||""}catch(e){}
+$("lbNick").oninput=()=>{try{localStorage.setItem("telurNick",$("lbNick").value)}catch(e){}};
+lbDraw();
+(async()=>{const msg=t=>{$("lbList").className="mu";$("lbList").textContent=t};
+ try{const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+  if(!db||!user)return msg("Leaderboard hanya tersedia untuk pemain yang login ke claude.ai dengan akses Contributor.");
+  lbMe=await user.id();if(!lbMe)return msg("Login dulu untuk ikut leaderboard.");
+  lbDb=db;const tm=setTimeout(()=>msg("Leaderboard tidak bisa dimuat."),10000);
+  db.collection("board").onSnapshot(s=>{clearTimeout(tm);lbRows=s.docs.map(d=>Object.assign({},d.data(),{id:d.id}));lbDraw()},()=>{clearTimeout(tm);lbDb=null;msg("Leaderboard tidak tersedia.")});
+  const push=async()=>{const st=lbStats(),j=JSON.stringify(st);if(j===lbLast)return;try{await db.doc("board/"+lbMe).set(st);lbLast=j}catch(e){}};
+  push();setInterval(push,15000);
+ }catch(e){msg("Leaderboard tidak tersedia di tampilan ini.")}})();
+function ownerFx(n){const t=document.createElement("div");t.className="own";t.innerHTML='<span class="oc">👑</span><div><b></b><div class="mu2">sedang masuk ke game!</div></div>';t.querySelector("b").textContent="Owner "+(n||"")+" masuk!";document.body.appendChild(t);
+ const fl=document.createElement("div");fl.className="oflash";document.body.appendChild(fl);setTimeout(()=>fl.remove(),1500);
+ for(let i=0;i<28;i++)setTimeout(()=>fxp(["👑","✨","🌟"][i%3]),i*60);
+ try{const c=new (window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain(),s=c.currentTime+i*.12;o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(.15,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+.3);o.connect(g);g.connect(c.destination);o.start(s);o.stop(s+.35)})}catch(e){}
+ setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),700)},4500)}
+const ob=document.createElement("span");ob.style.cssText="display:none;font-size:12px;font-weight:700;color:#b45309;background:#fde68a;border-radius:99px;padding:3px 8px;white-space:nowrap";ob.textContent="👑 Owner online";document.querySelector(".card").appendChild(ob);
+(async()=>{try{const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);if(!db||!user)return;
+ const ref=db.doc("owner/status");
+ if(user.isOwner()){const oid=await user.id();const beat=()=>ref.set({on:1,ts:Date.now(),nick:($("lbNick").value||"Owner").slice(0,14),id:oid}).catch(()=>{});beat();setInterval(beat,20000);
+  addEventListener("pagehide",()=>{ref.set({on:0,ts:Date.now(),nick:"",id:oid}).catch(()=>{})});return}
+ let od=null,was=null,got=false;
+ const ev=()=>{if(!got)return;const on=!!(od&&od.on&&Date.now()-od.ts<50000);ob.style.display=on?"inline-block":"none";if(was!==null&&on&&!was)ownerFx(od.nick);was=on};
+ ref.onSnapshot(s=>{od=s.exists?s.data():null;got=true;ev()},()=>{});setInterval(ev,5000);
+}catch(e){}})();
+const gate=$("gate"),gT=$("gT"),gM=$("gM"),gF=$("gF"),gIn=$("gIn"),gGo=$("gGo");
+let ME=null,ISOWNER=false,NDB=null;
+const NRX=/^[\p{L}\p{N}_ ]{3,14}$/u;
+function gBlock(t,m){gT.textContent=t;gM.textContent=m;gF.style.display="none"}
+function lockNick(n){const i=$("lbNick");i.value=n;i.readOnly=true;i.title="Nama dikunci. Hanya owner yang bisa mengubahnya.";i.style.borderStyle="solid";$("nickIc").textContent="🔒"}
+function renSel(){const s=$("aRenSel");if(!s)return;const v=s.value;s.innerHTML="";Object.keys(NAMES).forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=NAMES[k]+(k===ME?" (kamu)":"");s.appendChild(o)});if(v)s.value=v}
+async function renamePlayer(){if(!ISOWNER||!NDB)return;const id=$("aRenSel").value,n=$("aRenIn").value.replace(/\s+/g," ").trim();
+ if(!id||!NRX.test(n)){$("aInfo").textContent="Nama baru tidak valid (3–14 karakter).";return}
+ try{await NDB.doc("names/"+id).set({nick:n,ts:Date.now()});$("aInfo").textContent="Nama diganti menjadi "+n;if(id===ME)lockNick(n);$("aRenIn").value=""}catch(e){$("aInfo").textContent="Gagal mengganti nama."}}
+const NOLOGIN=["🔒 Login diperlukan","Buka game ini lewat claude.ai dengan akun yang sudah login (akses Contributor), lalu muat ulang halaman."];
+setTimeout(()=>{if(gT.textContent==="Memeriksa akun...")gBlock(NOLOGIN[0],NOLOGIN[1])},12000);
+(async()=>{try{
+ const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+ if(!db||!user)return gBlock(NOLOGIN[0],NOLOGIN[1]);
+ ME=await user.id();if(!ME)return gBlock(NOLOGIN[0],NOLOGIN[1]);
+ ISOWNER=!!user.isOwner();NDB=db;
+ if(user.can&&(await user.can("data.write"))===false)return gBlock("🔒 Akses belum cukup","Akunmu belum punya izin Contributor. Minta owner memberi akses, lalu muat ulang halaman.");
+ if(ISOWNER)$("aRen").style.display="flex";
+ db.collection("names").onSnapshot(s=>{NAMES={};s.docs.forEach(d=>{const x=d.data();if(x&&x.nick)NAMES[d.id]=x.nick});lbDraw();renSel()},()=>{});
+ const ref=db.doc("names/"+ME),snap=await ref.get();
+ if(snap.exists&&snap.data().nick){lockNick(snap.data().nick);gate.classList.add("hide");return}
+ gT.textContent="Buat nama pemain";gM.textContent="Nama tidak bisa diubah setelah dibuat. Hanya owner yang bisa menggantinya. Owner juga dapat memantau statistik permainanmu (uang, hewan, status online).";gF.style.display="flex";
+ gGo.onclick=async()=>{const n=gIn.value.replace(/\s+/g," ").trim();
+  if(!NRX.test(n))return gM.textContent="Nama harus 3–14 karakter: huruf, angka, spasi, atau _.";
+  if(!ISOWNER&&/owner|admin/i.test(n))return gM.textContent="Nama itu tidak boleh dipakai.";
+  const low=n.toLowerCase();if(Object.keys(NAMES).some(k=>k!==ME&&NAMES[k].toLowerCase()===low))return gM.textContent="Nama sudah dipakai pemain lain.";
+  gGo.disabled=true;
+  try{const again=await ref.get();if(again.exists&&again.data().nick){lockNick(again.data().nick);gate.classList.add("hide");return}
+   await ref.set({nick:n,ts:Date.now()});lockNick(n);gate.classList.add("hide")}
+  catch(e){gGo.disabled=false;gM.textContent="Gagal menyimpan nama. Pastikan akunmu punya akses Contributor, lalu coba lagi."}}
+}catch(e){gBlock("🔒 Tidak bisa memverifikasi akun","Pastikan kamu login ke claude.ai lalu muat ulang halaman.")}})();
+(function(){const W=$("walk"),A=["🐔","🐰","🦊","🐧","🐼","🐹","🦁","🐘","🐯","🦄","🐢","🐕","🐄","🐖","🦆","🐑"];
+ for(let i=0;i<14;i++){const e=A[i%A.length],d=document.createElement("div"),r=Math.random()<.5,s=document.createElement("span"),dur=(16+Math.random()*22)*(e==="🐢"?2:1);
+  s.textContent=e;d.className="an";d.style.fontSize=(24+Math.random()*20)+"px";d.style.bottom=(Math.random()*18)+"px";d.style.opacity=.75+Math.random()*.25;
+  d.style.animationName=r?"wR":"wL";d.style.animationDuration=dur+"s";d.style.animationDelay=(-Math.random()*dur)+"s";
+  s.style.animationDuration=(.35+Math.random()*.3)+"s";if(r)s.style.transform="scaleX(-1)";d.appendChild(s);W.appendChild(d)}})();
+function monStats(){const z=S.zoo||{};let n=0;const top=Object.keys(z).sort((a,b)=>z[b].i-z[a].i).slice(0,4);for(const k in z)n+=z[k].n;
+ return{nick:($("lbNick").value||"").slice(0,14),ts:Date.now(),money:Math.floor(S.money),inc:Math.floor(income()),best:Math.floor(S.best||0),tot:Math.floor(S.tot||0),an:n,sp:Object.keys(z).length,dex:Object.keys(S.dex||{}).length,top:top.join(" "),pw:S.pw||0,cd:S.cd||0,lk:S.lk||0,eq:S.eq||0,th:S.th||0,adm:S.adm?1:0,ev:Object.keys(act()).join(",")}}
+(async()=>{try{const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);if(!db||!user)return;
+ const id=await user.id();if(!id)return;
+ const push=()=>{db.doc("monitor/"+id).set(monStats()).catch(()=>{})};push();setInterval(push,15000);
+ addEventListener("pagehide",()=>{db.doc("monitor/"+id).set(Object.assign(monStats(),{ts:0})).catch(()=>{})});
+ if(!user.isOwner())return;
+ const mc=document.createElement("div");mc.className="card";mc.innerHTML='<h2>🕵️ Pantau Pemain <span class="mu" id="mSum"></span></h2><div id="mList" class="mu">Memuat...</div>';lb.after(mc);
+ let MR=[],MO=null;
+ const ago=t=>{const s=Math.floor((Date.now()-t)/1000);return s<60?s+" dtk lalu":s<3600?Math.floor(s/60)+" mnt lalu":s<86400?Math.floor(s/3600)+" jam lalu":Math.floor(s/86400)+" hari lalu"};
+ const on=p=>p.ts&&Date.now()-p.ts<40000;
+ function mDraw(){const L=$("mList");L.className="";L.innerHTML="";
+  const r=MR.slice().sort((a,b)=>(on(b)?1:0)-(on(a)?1:0)||(b.ts||0)-(a.ts||0));
+  $("mSum").textContent="· "+r.filter(on).length+"/"+r.length+" online";
+  if(!r.length){L.className="mu";L.textContent="Belum ada data pemain.";return}
+  r.forEach(p=>{const d=document.createElement("div");d.style.cssText="border-top:1px solid var(--bd);padding:8px 0;cursor:pointer";
+   const h=document.createElement("div");h.style.cssText="display:flex;justify-content:space-between;gap:8px";
+   const a=document.createElement("b");a.textContent=(on(p)?"🟢 ":"⚪ ")+(NAMES[p.id]||p.nick||"Pemain")+(p.adm?" 🔧":"")+(p.id===id?" (kamu)":"");
+   const b=document.createElement("span");b.className="mu";b.textContent=on(p)?"online":(p.ts?ago(p.ts):"offline");h.append(a,b);
+   const s=document.createElement("div");s.className="mu";s.textContent="💰 "+fmt(p.money||0)+" · 📈 "+fmt(p.inc||0)+"/dtk · 🎯 "+(p.best||0)+" m · 🐾 "+(p.an||0);
+   const x=document.createElement("div");x.className="mu";x.style.display=MO===p.id?"block":"none";
+   x.textContent="Total uang "+fmt(p.tot||0)+" · Lemparan "+(p.th||0)+" · Spesies "+(p.sp||0)+" · Koleksi "+(p.dex||0)+" · Lv Kekuatan "+(p.pw||0)+"/Kecepatan "+(p.cd||0)+"/Hoki "+(p.lk||0)+" · Animasi "+(ANIMS[p.eq||0]||ANIMS[0]).n+" · Hewan teratas: "+(p.top||"-")+(p.ev?" · Event: "+p.ev:"");
+   d.onclick=()=>{MO=MO===p.id?null:p.id;mDraw()};d.append(h,s,x);L.appendChild(d)})}
+ db.collection("monitor").onSnapshot(s=>{MR=s.docs.map(d=>Object.assign({},d.data(),{id:d.id}));mDraw()},()=>{$("mList").textContent="Tidak bisa memuat data pemain."});
+ setInterval(mDraw,5000);
+}catch(e){}})();
+let OWNID=null;
+(async()=>{try{const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);if(!db||!user)return;
+ const id=await user.id();if(!id)return;const isO=!!user.isOwner();
+ const cm=document.createElement("div");cm.className="card";cm.innerHTML='<h2>💬 Komentar</h2><div style="display:flex;gap:6px"><input id="cmIn" maxlength="140" placeholder="Tulis komentar..." style="flex:1;min-width:0;font:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)"><button id="cmGo">Kirim</button></div><div id="cmErr" class="mu"></div><div id="cmList" class="mu" style="margin-top:6px">Memuat...</div>';lb.after(cm);
+ let rows=[],last=0;
+ const ago=t=>{const s=Math.max(0,Math.floor((Date.now()-t)/1000));return s<60?"baru saja":s<3600?Math.floor(s/60)+" mnt lalu":s<86400?Math.floor(s/3600)+" jam lalu":Math.floor(s/86400)+" hari lalu"};
+ const mineOf=pid=>rows.filter(r=>r.pid===pid).map(r=>({t:r.t,ts:r.ts})).sort((a,b)=>a.ts-b.ts);
+ const save=(pid,list)=>db.doc("comments/"+pid).set({list:list.slice(-15)});
+ async function del(r){try{await save(r.pid,mineOf(r.pid).filter(c=>!(c.ts===r.ts&&c.t===r.t)))}catch(e){$("cmErr").textContent="Gagal menghapus komentar."}}
+ function draw(){const L=$("cmList");L.className="";L.innerHTML="";const r=rows.slice().sort((a,b)=>b.ts-a.ts).slice(0,30);
+  if(!r.length){L.className="mu";L.textContent="Belum ada komentar. Jadilah yang pertama!";return}
+  r.forEach(c=>{const o=c.pid===OWNID,d=document.createElement("div");d.style.cssText="border-top:1px solid var(--bd);padding:8px 0 8px 8px;"+(o?"border-left:3px solid #f59e0b;background:rgba(245,158,11,.08);":"");
+   const h=document.createElement("div");h.style.cssText="display:flex;justify-content:space-between;gap:8px;align-items:center";
+   const n=document.createElement("b");n.textContent=(o?"👑 ":"")+(VIPS[c.pid]>Date.now()?"⭐ ":"")+(NAMES[c.pid]||"Pemain")+(o?" (Owner)":"");
+   const m=document.createElement("span");m.className="mu";m.textContent=ago(c.ts);
+   if(c.pid===id||isO){const x=document.createElement("button");x.textContent="🗑";x.style.cssText="padding:2px 8px;background:#999;font-size:12px;margin-left:6px";x.onclick=()=>del(c);m.appendChild(x)}
+   h.append(n,m);const t=document.createElement("div");t.style.cssText="margin-top:2px;word-break:break-word";t.textContent=c.t;d.append(h,t);L.appendChild(d)})}
+ db.collection("comments").onSnapshot(s=>{rows=[];s.docs.forEach(d=>{const l=(d.data()||{}).list;if(Array.isArray(l))l.forEach(c=>{if(c&&typeof c.t==="string"&&typeof c.ts==="number")rows.push({pid:d.id,t:c.t.slice(0,140),ts:c.ts})})});draw()},()=>{$("cmList").textContent="Komentar tidak bisa dimuat."});
+ db.doc("owner/status").onSnapshot(s=>{const d=s.exists?s.data():null;OWNID=d&&d.id||null;draw()},()=>{});
+ setInterval(draw,30000);
+ $("cmGo").onclick=async()=>{const t=$("cmIn").value.trim().slice(0,140);if(!t)return;
+  if(Date.now()-last<5000){$("cmErr").textContent="Tunggu beberapa detik sebelum berkomentar lagi.";return}
+  const mine=mineOf(id);mine.push({t,ts:Date.now()});$("cmGo").disabled=true;
+  try{await save(id,mine);last=Date.now();$("cmIn").value="";$("cmErr").textContent="";SFX.click()}catch(e){$("cmErr").textContent="Gagal mengirim komentar."}
+  $("cmGo").disabled=false};
+ $("cmIn").onkeydown=e=>{if(e.key==="Enter")$("cmGo").click()};
+}catch(e){}})();
+(async()=>{try{const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);if(!db||!user)return;
+ const id=await user.id();if(!id)return;const isO=!!user.isOwner();const DAY=86400000;
+ const PK=[{d:7,m:2e6,s:50},{d:30,m:7e6,s:150}];
+ let W={bal:0,appr:[],rej:[]},SP=0,TU=null,vm="";
+ const saldo=()=>Math.max(0,(W.bal||0)-SP);
+ const vc=document.createElement("div");vc.className="card";sh.after(vc);
+ async function setVip(pid,days,src){const until=days>0?Math.max(Date.now(),VIPS[pid]||0)+days*DAY:0;await db.doc("vip/"+pid).set({until,src});return until}
+ function vdraw(){const left=VIP.until-Date.now(),on=left>0;const ap=W.appr||[],rj=W.rej||[];const pend=TU&&!ap.includes(TU.ts)&&!rj.includes(TU.ts),rej=TU&&rj.includes(TU.ts);
+  vc.innerHTML='<h2>⭐ Toko VIP</h2><div class="mu">'+(on?"⭐ VIP aktif · sisa "+Math.ceil(left/DAY)+" hari":"Belum VIP")+' · 💎 Saldo: <b>'+fmt(saldo())+'</b></div><div class="mu" style="margin:4px 0">Perks: pendapatan ×1,25 · telur pecah separuh · jeda lempar 20% lebih cepat · badge ⭐</div>'+
+  PK.map((p,i)=>'<div class="row"><div><b>VIP '+p.d+' hari</b></div><div style="display:flex;gap:6px"><button '+(S.money<p.m?"disabled":"")+' onclick="vipBuy('+i+',\'m\')">💰 '+fmt(p.m)+'</button><button '+(saldo()<p.s?"disabled":"")+' onclick="vipBuy('+i+',\'s\')">💎 '+p.s+'</button></div></div>').join("")+
+  '<div class="mu" style="margin-top:8px">💎 Top Up saldo (disetujui owner, belum ada pembayaran otomatis):</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">'+[50,150,500].map(a=>'<button '+(pend?"disabled":"")+' style="background:#16a34a" onclick="vipTop('+a+')">+'+a+'</button>').join("")+'</div><div class="mu">'+(vm||(pend?"⏳ Menunggu persetujuan owner: 💎"+(+TU.amt||0):rej?"❌ Top up terakhir ditolak owner.":""))+'</div>'}
+ window.vipBuy=async(i,k)=>{const p=PK[i];try{
+  if(k==="m"){if(S.money<p.m)return;await setVip(id,p.d,"buy");S.money-=p.m;save()}
+  else{if(saldo()<p.s)return;await db.doc("spent/"+id).set({total:SP+p.s});await setVip(id,p.d,"buy")}
+  vm="✅ VIP aktif!";SFX.rare()}catch(e){vm="Gagal membeli VIP."}vdraw()};
+ window.vipTop=async a=>{try{await db.doc("topup/"+id).set({amt:a,ts:Date.now(),nick:NAMES[id]||"Pemain"});vm="⏳ Permintaan top up 💎"+a+" dikirim. Tunggu persetujuan owner."}catch(e){vm="Gagal mengirim permintaan."}vdraw()};
+ db.collection("vip").onSnapshot(s=>{VIPS={};s.docs.forEach(d=>{const u=(d.data()||{}).until;if(typeof u==="number")VIPS[d.id]=u});VIP.until=VIPS[id]||0;VIP.on=VIP.until>Date.now();vdraw();lbDraw()},()=>{});
+ db.doc("wallet/"+id).onSnapshot(s=>{W=Object.assign({bal:0,appr:[],rej:[]},s.exists?s.data():{});vdraw()},()=>{});
+ db.doc("spent/"+id).onSnapshot(s=>{SP=s.exists?(+s.data().total||0):0;vdraw()},()=>{});
+ db.doc("topup/"+id).onSnapshot(s=>{TU=s.exists?s.data():null;vdraw()},()=>{});
+ setInterval(()=>{VIP.on=VIP.until>Date.now();vdraw()},3000);vdraw();
+ if(!isO)return;
+ const oc=document.createElement("div");oc.className="card";oc.innerHTML='<h2>🧾 Owner: VIP & Top Up</h2><div style="display:flex;gap:6px;flex-wrap:wrap"><select id="oSel" style="flex:1;min-width:120px;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)"></select><input id="oAmt" type="number" placeholder="Jumlah" style="width:90px;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)"></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><button id="oGift">Gift VIP (hari)</button><button id="oRev" style="background:#dc2626">Cabut VIP</button><button id="oCoin" style="background:#16a34a">Beri 💎 saldo</button></div><div class="mu" id="oMsg"></div><h2 style="margin-top:10px">Permintaan Top Up</h2><div id="oReq" class="mu">Tidak ada.</div>';lb.after(oc);
+ let TQ=[],WL={};const om=t=>$("oMsg").textContent=t;
+ async function wAdd(pid,delta,key,ts){const r=db.doc("wallet/"+pid),s=await r.get(),w=Object.assign({bal:0,appr:[],rej:[]},s.exists?s.data():{});w.bal=Math.max(0,(w.bal||0)+delta);if(key)w[key]=(w[key]||[]).concat([ts]).slice(-30);await r.set(w)}
+ function odraw(){const sel=$("oSel"),v=sel.value;sel.innerHTML="";Object.keys(NAMES).forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=(VIPS[k]>Date.now()?"⭐ ":"")+NAMES[k];sel.appendChild(o)});if(v)sel.value=v;
+  const L=$("oReq");L.innerHTML="";const q=TQ.filter(t=>typeof t.ts==="number"&&!((WL[t.id]||{}).appr||[]).includes(t.ts)&&!((WL[t.id]||{}).rej||[]).includes(t.ts));
+  if(!q.length){L.textContent="Tidak ada.";return}
+  q.forEach(t=>{const amt=Math.min(10000,Math.max(0,Math.floor(+t.amt||0))),d=document.createElement("div");d.className="row";const a=document.createElement("span");a.textContent=(NAMES[t.id]||t.nick||"Pemain")+": 💎"+amt;
+   const b1=document.createElement("button");b1.textContent="Setujui";b1.style.background="#16a34a";b1.onclick=async()=>{try{await wAdd(t.id,amt,"appr",t.ts);om("✅ Top up disetujui.")}catch(e){om("Gagal.")}};
+   const b2=document.createElement("button");b2.textContent="Tolak";b2.style.background="#dc2626";b2.onclick=async()=>{try{await wAdd(t.id,0,"rej",t.ts);om("Ditolak.")}catch(e){om("Gagal.")}};
+   const w=document.createElement("span");w.style.cssText="display:flex;gap:6px";w.append(b1,b2);d.append(a,w);L.appendChild(d)})}
+ db.collection("topup").onSnapshot(s=>{TQ=s.docs.map(d=>Object.assign({},d.data(),{id:d.id}));odraw()},()=>{});
+ db.collection("wallet").onSnapshot(s=>{WL={};s.docs.forEach(d=>WL[d.id]=d.data()||{});odraw()},()=>{});
+ setInterval(odraw,5000);
+ $("oGift").onclick=async()=>{const pid=$("oSel").value,d=Math.floor(+$("oAmt").value||0);if(!pid||d<1)return om("Isi jumlah hari (minimal 1).");try{await setVip(pid,d,"gift");om("✅ VIP "+d+" hari diberikan.")}catch(e){om("Gagal.")}};
+ $("oRev").onclick=async()=>{const pid=$("oSel").value;if(!pid)return;try{await setVip(pid,0,"gift");om("VIP dicabut.")}catch(e){om("Gagal.")}};
+ $("oCoin").onclick=async()=>{const pid=$("oSel").value,a=Math.floor(+$("oAmt").value||0);if(!pid||a<1)return om("Isi jumlah saldo (minimal 1).");try{await wAdd(pid,a);om("✅ Saldo 💎"+a+" diberikan.")}catch(e){om("Gagal.")}};
+}catch(e){}})();
+const SFX=(()=>{let c=null,on=true;try{on=localStorage.getItem("telurSnd")!=="0"}catch(e){}
+ const ctx=()=>{if(!c){try{c=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(c.state==="suspended")c.resume();return c};
+ function tone(f,d,ty,v,s,f2){const a=ctx();if(!a||!on)return;const o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+(s||0);o.type=ty||"sine";o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(v||.15,t0+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(a.destination);o.start(t0);o.stop(t0+d+.05)}
+ function noise(d,f0,f1,v,s){const a=ctx();if(!a||!on)return;const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),x=b.getChannelData(0);for(let i=0;i<n;i++)x[i]=Math.random()*2-1;const src=a.createBufferSource(),fl=a.createBiquadFilter(),g=a.createGain(),t0=a.currentTime+(s||0);src.buffer=b;fl.type="bandpass";fl.frequency.setValueAtTime(f0,t0);fl.frequency.exponentialRampToValueAtTime(f1,t0+d);g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(v||.2,t0+d*.2);g.gain.exponentialRampToValueAtTime(.0001,t0+d);src.connect(fl);fl.connect(g);g.connect(a.destination);src.start(t0)}
+ return{get on(){return on},
+  toggle(){on=!on;try{localStorage.setItem("telurSnd",on?"1":"0")}catch(e){}if(on)tone(600,.08,"square",.06);return on},
+  click(){tone(620,.05,"square",.04)},
+  throw(){noise(.75,350,2600,.25)},
+  hatch(z){tone(300+z*110,.14,"sine",.22,.55,700+z*180);noise(.1,900,200,.12,.55);if(z>=2)[784,988,1319].forEach((f,i)=>tone(f,.2,"triangle",.1,.7+i*.07))},
+  break(){noise(.3,3000,500,.3,.55);tone(300,.25,"sawtooth",.07,.55,80)},
+  coin(){tone(988,.08,"square",.06);tone(1319,.2,"square",.06,.08)},
+  buy(){[523,659,784].forEach((f,i)=>tone(f,.16,"triangle",.12,i*.07))},
+  rare(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.25,"triangle",.12,i*.09))},
+  secret(){[220,277,330,440,554,659].forEach((f,i)=>tone(f,.45,"sine",.12,i*.1))}}})();
+const sb=document.createElement("button");sb.style.cssText="padding:6px 9px;background:#999;font-size:14px";const sbU=()=>sb.textContent=SFX.on?"🔊":"🔇";sbU();sb.onclick=()=>{SFX.toggle();sbU()};document.querySelector(".card").appendChild(sb);
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("button");if(b&&b.id!=="throw"&&b!==sb)SFX.click()});
+const TABS=[["main","🏠","Main"],["shop","🛒","Toko"],["col","🐾","Koleksi"],["soc","🏆","Sosial"],["more","⚙️","Lainnya"]];
+let TAB="main";try{TAB=localStorage.getItem("telurTab")||"main"}catch(e){}
+if(!TABS.some(t=>t[0]===TAB))TAB="main";
+const nav=document.createElement("nav");nav.id="appnav";
+TABS.forEach(t=>{const b=document.createElement("button");b.dataset.t=t[0];b.innerHTML='<span class="ni">'+t[1]+'</span><span class="nl">'+t[2]+'</span>';b.onclick=()=>{TAB=t[0];try{localStorage.setItem("telurTab",TAB)}catch(e){}applyTab(true);scrollTo({top:0})};nav.appendChild(b)});
+document.body.appendChild(nav);
+function tabOf(el){if(el.id==="evbar"||el.classList.contains("top")||el.querySelector("#lbNick"))return"all";
+ if(el.querySelector("#throw"))return"main";
+ const h=(el.querySelector("h2")||{}).textContent||"";
+ if(/Latihan|Animasi Lemparan|Toko VIP/.test(h))return"shop";
+ if(/Hewan Kamu|Index Hewan/.test(h))return"col";
+ if(/Leaderboard|Komentar/.test(h))return"soc";
+ return"more"}
+function applyTab(anim){[...document.body.children].forEach(el=>{if(!el.classList||!el.classList.contains("card"))return;const t=tabOf(el),show=t==="all"||t===TAB;el.classList.toggle("tabhide",!show);if(show&&anim){el.classList.remove("tabin");void el.offsetWidth;el.classList.add("tabin")}});
+ nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.t===TAB))}
+applyTab();setInterval(()=>applyTab(false),700);
+const evb=document.createElement("div");evb.className="card";evb.id="evbar";evb.style.cssText="display:none;border-color:#f59e0b";document.querySelector(".top").after(evb);
+function act(){if(!S.ev)S.ev={};const n=Date.now();for(const k in S.ev)if(S.ev[k]<=n)delete S.ev[k];return S.ev}
+function evM(key){let m=1;const a=act();for(const id in a){const e=EVENTS.find(x=>x.id===id);if(e&&e[key])m*=e[key]}return m}
+function evOn(key){const a=act();return Object.keys(a).some(id=>{const e=EVENTS.find(x=>x.id===id);return e&&e[key]})}
+function evF(){let m=0;const a=act();for(const id in a){const e=EVENTS.find(x=>x.id===id);if(e&&e.force)m=Math.max(m,e.force)}return m}
+const TH={money:{c:"th-money",fx:"💸"},wind:{c:"th-wind",fx:"🍃"},rare:{c:"th-rare",fx:"✨"},speed:{c:"th-speed",fx:"⚡"},gate:{c:"th-gate",fx:"🔮"}};
+function fxp(e){const p=document.createElement("span");p.className="fx";p.textContent=e;p.style.left=Math.random()*100+"vw";p.style.fontSize=(14+Math.random()*16)+"px";p.style.setProperty("--dx",(Math.random()*40-20)+"vw");p.style.animationDuration=(3+Math.random()*3)+"s";p.onanimationend=()=>p.remove();document.body.appendChild(p)}
+function updEv(){const b=$("evbar");if(!b)return;const a=act(),ks=Object.keys(a);const tp=ks[ks.length-1],cl=tp&&TH[tp]?TH[tp].c:"";if(document.body.className!==cl)document.body.className=cl;if(cl&&!document.hidden&&Math.random()<.6)fxp(TH[tp].fx);b.style.display=ks.length?"block":"none";
+ b.innerHTML=ks.map(id=>{const e=EVENTS.find(x=>x.id===id),s=Math.ceil((a[id]-Date.now())/1000);return `<div class="row"><div><b>${e.n}</b> <span class="mu">${e.d}</span></div><b>${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</b></div>`}).join("")}
+$("adminBtn").onclick=()=>{const p=$("admin");if(p.style.display==="block"){p.style.display="none";return}
+ const b=$("pinBox");b.style.display=b.style.display==="none"?"block":"none";$("pinErr").textContent="";$("pinIn").value=""};
+$("pinOk").onclick=()=>{if($("pinIn").value===PIN){$("admin").style.display="block";$("pinBox").style.display="none"}else $("pinErr").textContent="PIN salah"};
+$("aSel").innerHTML=ZONES.map((z,zi)=>z.a.map((a,ai)=>`<option value="${zi}-${ai}">${a[0]} ${z.n} (${a[1]}/dtk)</option>`).join("")).join("");
+const num=id=>Math.max(0,parseFloat($(id).value)||0);
+function adm(w){S.adm=1;
+ if(w==="mAdd")S.money+=num("aMoney");
+ else if(w==="mSet")S.money=num("aMoney");
+ else if(w==="pw")S.pw=Math.floor(num("aPw"));
+ else if(w==="cd")S.cd=Math.floor(num("aCd"));
+ else if(w==="lk")S.lk=Math.floor(num("aLk"));
+ else if(w==="spawn"){const [zi,ai]=$("aSel").value.split("-").map(Number),a=ZONES[zi].a[ai],n=Math.max(1,Math.floor(num("aN")));
+  if(!S.zoo[a[0]])S.zoo[a[0]]={n:0,i:a[1],z:zi};S.zoo[a[0]].n+=n}
+ else if(w==="ev"){const mins=Math.max(.1,num("aEvT")||1);act();S.ev[$("aEv").value]=Date.now()+mins*60000;updEv();SFX.rare()}
+ else if(w==="evStop"){S.ev={};updEv()}
+ else if(w==="dist")A.dist=num("aDist");
+ else if(w==="mult")A.mult=num("aMult")||1;
+ else if(w==="nocd"){A.nocd=!A.nocd;$("aCdBtn").textContent="Tanpa jeda: "+(A.nocd?"AKTIF":"MATI")}
+ else if(w==="clear"){if(A.cf){S.zoo={};A.cf=0}else{A.cf=1;$("aInfo").textContent="Tekan 'Hapus semua hewan' sekali lagi untuk konfirmasi";setTimeout(()=>A.cf=0,4000);return}}
+ $("aInfo").textContent=`Jarak paksa: ${A.dist||"normal"} · Pengali: ×${A.mult}`;
+ save();render()}
+let rc=0;$("reset").onclick=()=>{if(rc){S={money:0,pw:0,cd:0,lk:0,zoo:{}};save();render();rc=0;$("reset").textContent="Reset game"}else{rc=1;$("reset").textContent="Yakin? Tap lagi";setTimeout(()=>{rc=0;$("reset").textContent="Reset game"},4000)}};
+render();
+</script></body></html>
